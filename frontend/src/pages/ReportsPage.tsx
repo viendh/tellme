@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BarChart2, AlertTriangle, Users, TrendingUp, Clock, Loader2 } from 'lucide-react';
+import { ExportButton } from '../components/common/ExportButton';
+import { exportToExcel, exportToPdf, mapIssuesToRows, ISSUE_EXPORT_COLUMNS } from '../utils/exportUtils';
 import {
   useOverdueReport,
   useWorkloadReport,
@@ -76,6 +78,11 @@ function OverdueReport({ projectId }: { projectId: number }) {
 
   if (isLoading) return <LoadingSpinner />;
 
+  const handleExportExcel = () =>
+    exportToExcel('overdue-issues', 'Issue quá hạn', ISSUE_EXPORT_COLUMNS, mapIssuesToRows(issues));
+  const handleExportPdf = () =>
+    exportToPdf('overdue-issues', 'Báo cáo Issue Quá hạn', `${issues.length} issues · ${new Date().toLocaleDateString('vi-VN')}`, ISSUE_EXPORT_COLUMNS, mapIssuesToRows(issues));
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
       <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
@@ -83,7 +90,12 @@ function OverdueReport({ projectId }: { projectId: number }) {
           <AlertTriangle className="w-4 h-4 text-red-500" />
           {t('report.overdue')}
         </h2>
-        <span className="text-xs text-gray-500">{issues.length} {t('report.issues')}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-500">{issues.length} {t('report.issues')}</span>
+          {issues.length > 0 && (
+            <ExportButton onExportExcel={handleExportExcel} onExportPdf={handleExportPdf} count={issues.length} />
+          )}
+        </div>
       </div>
       {issues.length === 0 ? (
         <div className="py-12 text-center text-gray-500 text-sm">{t('report.noOverdue')}</div>

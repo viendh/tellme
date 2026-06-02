@@ -5,6 +5,8 @@ import {
   Loader2, ClipboardList, ArrowRight, Search, CheckSquare, X, ChevronDown,
   Clock, Layers, MessageSquare, CalendarDays,
 } from 'lucide-react';
+import { ExportButton } from '../components/common/ExportButton';
+import { exportToExcel, exportToPdf, ISSUE_EXPORT_COLUMNS, mapIssuesToRows } from '../utils/exportUtils';
 import { useMyIssues } from '../hooks/useIssues';
 import { useQueryClient } from '@tanstack/react-query';
 import { issueKeys } from '../hooks/useIssues';
@@ -89,6 +91,13 @@ export function MyIssuesPage() {
   };
   const clearSelection = () => setSelected(new Set());
 
+  const handleExportExcel = () => {
+    exportToExcel('my-issues', 'Issue của tôi', ISSUE_EXPORT_COLUMNS, mapIssuesToRows(filtered));
+  };
+  const handleExportPdf = () => {
+    exportToPdf('my-issues', 'Issue của tôi', `${filtered.length} issues · ${new Date().toLocaleDateString('vi-VN')}`, ISSUE_EXPORT_COLUMNS, mapIssuesToRows(filtered));
+  };
+
   const applyBulkUpdate = async (data: { status?: IssueStatus; priority?: IssuePriority }) => {
     setBulkLoading(true);
     setShowStatusDrop(false);
@@ -124,9 +133,17 @@ export function MyIssuesPage() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       {/* ── Header ── */}
-      <div className="mb-5">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t('myIssues.title')}</h1>
-        <p className="text-gray-400 dark:text-gray-500 text-sm mt-0.5">{t('myIssues.subtitle', { count: issues.length })}</p>
+      <div className="mb-5 flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t('myIssues.title')}</h1>
+          <p className="text-gray-400 dark:text-gray-500 text-sm mt-0.5">{t('myIssues.subtitle', { count: issues.length })}</p>
+        </div>
+        <ExportButton
+          onExportExcel={handleExportExcel}
+          onExportPdf={handleExportPdf}
+          disabled={filtered.length === 0}
+          count={filtered.length}
+        />
       </div>
 
       {/* ── Bulk action bar ── */}

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Search, Filter, X, Loader2, ClipboardList } from 'lucide-react';
+import { ExportButton } from '../components/common/ExportButton';
+import { exportToExcel, exportToPdf, ISSUE_EXPORT_COLUMNS, mapIssuesToRows } from '../utils/exportUtils';
 import { useQuery } from '@tanstack/react-query';
 import { searchApi, type SearchParams } from '../api/search';
 import { useProjects } from '../hooks/useProjects';
@@ -46,6 +48,11 @@ export function AdvancedSearchPage() {
     setSubmitted(null);
   };
 
+  const handleExportExcel = () =>
+    exportToExcel('search-results', 'Kết quả tìm kiếm', ISSUE_EXPORT_COLUMNS, mapIssuesToRows(results));
+  const handleExportPdf = () =>
+    exportToPdf('search-results', 'Kết quả tìm kiếm', `${results.length} issues · ${new Date().toLocaleDateString('vi-VN')}`, ISSUE_EXPORT_COLUMNS, mapIssuesToRows(results));
+
   const set = (key: keyof SearchParams, value: string | number | undefined) =>
     setParams((p) => ({ ...p, [key]: value }));
 
@@ -55,10 +62,17 @@ export function AdvancedSearchPage() {
         {/* Header */}
         <div className="flex items-center gap-3">
           <Search className="w-6 h-6 text-blue-600" />
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-bold text-gray-900">{t('search.title')}</h1>
             <p className="text-sm text-gray-500">{t('search.subtitle')}</p>
           </div>
+          {results.length > 0 && (
+            <ExportButton
+              onExportExcel={handleExportExcel}
+              onExportPdf={handleExportPdf}
+              count={results.length}
+            />
+          )}
         </div>
 
         {/* Filter panel */}
