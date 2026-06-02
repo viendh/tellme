@@ -1,6 +1,7 @@
 package com.tellme.controller;
 
 import com.tellme.dto.request.SprintRequest;
+import com.tellme.dto.response.BurndownPoint;
 import com.tellme.dto.response.SprintResponse;
 import com.tellme.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,5 +54,10 @@ public class SprintController {
     public ResponseEntity<SprintResponse> completeSprint(@PathVariable Long id) {
         SprintResponse sprint = sprintService.completeSprint(id);
         return ResponseEntity.ok(sprint);
+    }
+
+    @GetMapping("/sprints/{id}/burndown")
+    public ResponseEntity<List<BurndownPoint>> getBurndown(@PathVariable Long id) {
+        return ResponseEntity.ok(sprintService.getBurndownData(id));
     }
 }

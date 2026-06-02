@@ -6,6 +6,7 @@ import type { CreateSprintInput, UpdateSprintInput } from '../types';
 export const sprintKeys = {
   all: ['sprints'] as const,
   byProject: (projectId: number) => [...sprintKeys.all, 'project', projectId] as const,
+  burndown:  (sprintId: number)  => ['sprints', 'burndown', sprintId] as const,
 };
 
 export function useSprints(projectId: number) {
@@ -74,6 +75,14 @@ export function useStartSprint(projectId: number) {
     onError: () => {
       toast.error('Failed to start sprint');
     },
+  });
+}
+
+export function useBurndown(sprintId: number | undefined) {
+  return useQuery({
+    queryKey: sprintKeys.burndown(sprintId ?? 0),
+    queryFn: () => sprintsApi.getBurndown(sprintId!),
+    enabled: !!sprintId,
   });
 }
 

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, TrendingDown, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useIssues, useCreateIssue } from '../hooks/useIssues';
 import { useSprints, useCreateSprint } from '../hooks/useSprints';
 import { useProjectMembers } from '../hooks/useProjects';
 import { BacklogView } from '../components/backlog/BacklogView';
+import { BurndownChart } from '../components/backlog/BurndownChart';
 import { IssueDetail } from '../components/issue/IssueDetail';
 import { IssueForm } from '../components/issue/IssueForm';
 import { Modal } from '../components/common/Modal';
@@ -25,10 +26,11 @@ export function BacklogPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const id = Number(projectId);
 
-  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+  const [selectedIssue, setSelectedIssue]   = useState<Issue | null>(null);
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [showSprintModal, setShowSprintModal] = useState(false);
   const [defaultSprintId, setDefaultSprintId] = useState<number | undefined>();
+  const [showBurndown, setShowBurndown]       = useState(false);
 
   const [sprintForm, setSprintForm] = useState<CreateSprintForm>({
     name: '',
@@ -39,6 +41,7 @@ export function BacklogPage() {
 
   const { data: issues = [], isLoading: issuesLoading } = useIssues(id);
   const { data: sprints = [], isLoading: sprintsLoading } = useSprints(id);
+  const activeSprint = sprints.find((s) => s.status === 'ACTIVE');
   const { data: members = [] } = useProjectMembers(id);
   const createIssue = useCreateIssue(id);
   const createSprint = useCreateSprint(id);
@@ -84,19 +87,52 @@ export function BacklogPage() {
       {/* Main backlog area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 flex-shrink-0">
-          <h2 className="font-semibold text-gray-900">{t('backlog.title')}</h2>
+        <div className="flex items-center justify-between px-6 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+          <h2 className="font-semibold text-gray-900 dark:text-white">{t('backlog.title')}</h2>
           <div className="flex items-center gap-2">
+            {activeSprint && (
+              <button
+                onClick={() => setShowBurndown((v) => !v)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md border transition-colors ${
+                  showBurndown
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+              >
+                <TrendingDown className="w-4 h-4" />
+                Burndown
+              </button>
+            )}
             <Button size="sm" variant="secondary" onClick={() => setShowSprintModal(true)}>
-              <Plus className="w-4 h-4" />
-              {t('backlog.createSprint')}
+              <Plus className="w-4 h-4" />{t('backlog.createSprint')}
             </Button>
             <Button size="sm" onClick={() => handleOpenCreateIssue(undefined)}>
-              <Plus className="w-4 h-4" />
-              {t('backlog.addIssue')}
+              <Plus className="w-4 h-4" />{t('backlog.addIssue')}
             </Button>
           </div>
         </div>
+
+        {/* Burndown panel */}
+        {showBurndown && activeSprint && (
+          <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-4 flex-shrink-0">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                  Burndown — <span className="text-blue-600">{activeSprint.name}</span>
+                </h3>
+                {activeSprint.startDate && activeSprint.endDate && (
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                    {activeSprint.startDate} → {activeSprint.endDate}
+                  </p>
+                )}
+              </div>
+              <button onClick={() => setShowBurndown(false)} className="p-1 text-gray-400 hover:text-gray-600 rounded">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <BurndownChart sprint={activeSprint} />
+          </div>
+        )}
 
         {/* Content */}
         {isLoading ? (

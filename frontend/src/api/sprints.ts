@@ -1,6 +1,13 @@
 import apiClient from './axios';
 import type { Sprint, CreateSprintInput, UpdateSprintInput } from '../types';
 
+export interface BurndownPoint {
+  date: string;
+  remaining: number;
+  ideal: number;
+  completed: number;
+}
+
 export const sprintsApi = {
   getByProject: async (projectId: number): Promise<Sprint[]> => {
     const response = await apiClient.get<Sprint[]>(`/api/projects/${projectId}/sprints`);
@@ -28,6 +35,11 @@ export const sprintsApi = {
 
   complete: async (id: number): Promise<Sprint> => {
     const response = await apiClient.post<Sprint>(`/api/sprints/${id}/complete`);
+    return response.data;
+  },
+
+  getBurndown: async (id: number): Promise<BurndownPoint[]> => {
+    const response = await apiClient.get<BurndownPoint[]>(`/api/sprints/${id}/burndown`);
     return response.data;
   },
 };
