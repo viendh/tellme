@@ -30,6 +30,7 @@ import { AdvancedSearchPage } from './pages/AdvancedSearchPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { WorkflowsPage } from './pages/WorkflowsPage';
 import { WorkflowBuilderPage } from './pages/WorkflowBuilderPage';
+import { RoadmapPage } from './pages/RoadmapPage';
 import { useAuthStore } from './store/authStore';
 
 const queryClient = new QueryClient({
@@ -98,7 +99,8 @@ function App() {
               <Route path="settings" element={<ProjectSettingsPage />} />
               <Route path="components" element={<ProjectComponentsPage />} />
               <Route path="versions" element={<ProjectVersionsPage />} />
-              <Route path="reports" element={<ReportsPage />} />
+              <Route path="reports"  element={<ReportsPage />} />
+              <Route path="roadmap" element={<RoadmapPage />} />
             </Route>
             <Route path="/issues/:issueId" element={<IssueDetailPage />} />
             <Route path="/search" element={<AdvancedSearchPage />} />

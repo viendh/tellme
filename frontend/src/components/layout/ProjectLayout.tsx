@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useParams, Link } from 'react-router-dom';
-import { Kanban, List, ChevronRight, Settings, Users, BarChart2, Puzzle, Tag, LineChart } from 'lucide-react';
+import { Kanban, List, ChevronRight, Settings, Users, BarChart2, Puzzle, Tag, LineChart, GanttChartSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProject } from '../../hooks/useProjects';
 import { Loader2 } from 'lucide-react';
@@ -123,6 +123,17 @@ export function ProjectLayout() {
           >
             <LineChart className="w-4 h-4" />
             {t('projectNav.reports')}
+          </NavLink>
+          <NavLink
+            to={`/projects/${id}/roadmap`}
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                isActive ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+              }`
+            }
+          >
+            <GanttChartSquare className="w-4 h-4" />
+            Roadmap
           </NavLink>
           <NavLink
             to={`/projects/${id}/settings`}
