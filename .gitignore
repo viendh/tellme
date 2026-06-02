@@ -1,0 +1,50 @@
+# ── Environment & Secrets ─────────────────────────────────────────
+.env
+.env.local
+.env.production
+*.env
+
+# ── Backend ──────────────────────────────────────────────────────
+backend/target/
+backend/run.log
+backend/run-err.log
+backend/*.log
+
+# ── Frontend ─────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# ── Node (root test tools) ────────────────────────────────────────
+node_modules/
+package-lock.json
+
+# ── Uploads (user files, not source code) ────────────────────────
+backend/uploads/
+uploads/
+
+# ── Logs ─────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── SSL Certs (never commit private keys) ────────────────────────
+nginx/certs/
+
+# ── Spring Boot config chứa credentials dev ──────────────────────
+backend/src/main/resources/application.yml
+
+# ── Test / temp artifacts ─────────────────────────────────────────
+pw-*.js
+ss*.png
+test-*.png
+*.png
+
+# ── IDE & OS ──────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ── Claude Code ───────────────────────────────────────────────────
+.claude/

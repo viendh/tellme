@@ -1,0 +1,15 @@
+# Root level
+node_modules/
+*.log
+.env
+.env.*
+!.env.example
+pw-*.js
+ss-*.png
+test-*.png
+nginx/certs/
+
+# Git
+.git/
+.github/
+.claude/
