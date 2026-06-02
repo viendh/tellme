@@ -33,6 +33,9 @@ public class CommentService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Transactional(readOnly = true)
     public List<CommentResponse> getIssueComments(Long issueId) {
         User currentUser = authService.getCurrentUserEntity();
@@ -58,6 +61,7 @@ public class CommentService {
         comment = commentRepository.save(comment);
 
         emailService.sendCommentAdded(issue, comment, currentUser);
+        notificationService.pushCommentAdded(issue, request.getContent(), currentUser);
 
         // Log activity
         ActivityLog log = ActivityLog.builder()

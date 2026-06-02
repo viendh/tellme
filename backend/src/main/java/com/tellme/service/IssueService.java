@@ -57,6 +57,9 @@ public class IssueService {
     private EmailService emailService;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private IssueWatcherRepository watcherRepository;
 
     @Autowired
@@ -229,6 +232,9 @@ public class IssueService {
         logActivity(issue, currentUser, "created issue", "title", null, issue.getTitle());
 
         emailService.sendIssueCreated(issue);
+        if (issue.getAssignee() != null) {
+            notificationService.pushIssueAssigned(issue.getAssignee(), issue, currentUser);
+        }
 
         return IssueResponse.fromIssue(issue);
     }
@@ -286,6 +292,7 @@ public class IssueService {
 
         if (request.getStatus() != null && !request.getStatus().equals(issue.getStatus())) {
             emailService.sendStatusChanged(issue, issue.getStatus().name(), request.getStatus().name(), currentUser);
+            notificationService.pushStatusChanged(issue, request.getStatus().name(), currentUser);
             logActivity(issue, currentUser, "changed status", "status",
                     issue.getStatus().name(), request.getStatus().name());
             issue.setStatus(request.getStatus());
@@ -324,6 +331,7 @@ public class IssueService {
                         oldName, newAssignee.getFullName());
                 issue.setAssignee(newAssignee);
                 emailService.sendIssueAssigned(newAssignee, issue, currentUser);
+                notificationService.pushIssueAssigned(newAssignee, issue, currentUser);
             }
         } else if (currentAssigneeId != null) {
             // Explicitly setting assignee to null
