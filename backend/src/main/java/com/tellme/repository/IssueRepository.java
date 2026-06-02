@@ -79,4 +79,15 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> findTop5ByAssigneeOrderByUpdatedAtDesc(User assignee);
 
     List<Issue> findByAssigneeOrderByUpdatedAtDesc(User assignee);
+
+    // Scheduled task queries
+    @Query("SELECT i FROM Issue i WHERE i.dueDate IS NOT NULL AND i.dueDate < :now AND i.status <> 'DONE' AND i.assignee IS NOT NULL")
+    List<Issue> findAllOverdue(@Param("now") java.time.LocalDateTime now);
+
+    @Query("SELECT i FROM Issue i WHERE i.slaHours IS NOT NULL AND i.status <> 'DONE' AND i.assignee IS NOT NULL " +
+           "AND FUNCTION('TIMESTAMPDIFF', 'HOUR', i.createdAt, :now) >= i.slaHours")
+    List<Issue> findAllSlaBreached(@Param("now") java.time.LocalDateTime now);
+
+    @Query("SELECT i FROM Issue i WHERE i.assignee IS NOT NULL AND i.status <> 'DONE' ORDER BY i.updatedAt DESC")
+    List<Issue> findAllActiveWithAssignee();
 }
