@@ -7,12 +7,20 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    define: {
+      global: 'globalThis',
+    },
     server: {
       port: 3000,
       proxy: {
         '/api': {
           target: apiUrl,
           changeOrigin: true,
+        },
+        '/ws': {
+          target: apiUrl,
+          changeOrigin: true,
+          ws: true,
         },
       },
     },
