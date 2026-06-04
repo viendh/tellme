@@ -6,6 +6,7 @@ import {
   Clock, Layers, MessageSquare, CalendarDays,
 } from 'lucide-react';
 import { ExportButton } from '../components/common/ExportButton';
+import { ColumnManagerPopover } from '../components/common/ColumnManagerPopover';
 import { exportToExcel, exportToPdf, ISSUE_EXPORT_COLUMNS, mapIssuesToRows } from '../utils/exportUtils';
 import { useMyIssues } from '../hooks/useIssues';
 import { useQueryClient } from '@tanstack/react-query';
@@ -14,7 +15,8 @@ import { issuesApi } from '../api/issues';
 import { StatusBadge, PriorityBadge, TypeBadge } from '../components/common/Badge';
 import { Avatar } from '../components/common/Avatar';
 import { formatDate } from '../utils/formatters';
-import { useSettingsStore } from '../store/settingsStore';
+import { useSettingsStore, MY_ISSUES_COLUMN_DEFS } from '../store/settingsStore';
+import type { CardField } from '../store/settingsStore';
 import toast from 'react-hot-toast';
 import type { IssueStatus, IssuePriority } from '../types';
 
@@ -114,20 +116,22 @@ export function MyIssuesPage() {
     }
   };
 
-  /* ── Build dynamic grid columns — fixed px so header & rows always align ── */
+  /* ── Build dynamic grid columns from ordered store ── */
+  const columnOrder = useSettingsStore((s) => s.myIssuesColumnOrder);
+
   const colDefs = [
-    { key: 'checkbox',    always: true,                    width: '40px'  },
-    { key: 'title',       always: true,                    width: '1fr'   },
-    { key: 'workflow',    always: cardFields.workflowStep, width: '120px' },
-    { key: 'environment', always: cardFields.environment,  width: '72px'  },
-    { key: 'status',      always: true,                    width: '120px' },
-    { key: 'priority',    always: cardFields.priority,     width: '100px' },
-    { key: 'type',        always: cardFields.type,         width: '80px'  },
-    { key: 'dueDate',     always: cardFields.dueDate,      width: '130px' },
-    { key: 'estimate',    always: cardFields.estimate,     width: '110px' },
-    { key: 'assignee',    always: cardFields.assignee,     width: '120px' },
-    { key: 'updated',     always: true,                    width: '110px' },
-  ].filter((c) => c.always);
+    { key: 'checkbox', width: '40px' },
+    { key: 'title',    width: '1fr'  },
+    ...columnOrder
+      .map((id) => {
+        const def = MY_ISSUES_COLUMN_DEFS[id];
+        if (!def) return null;
+        const visible = def.alwaysVisible ?? (def.cardField ? cardFields[def.cardField as CardField] : true);
+        if (!visible) return null;
+        return { key: id, width: def.width };
+      })
+      .filter((c): c is { key: string; width: string } => c !== null),
+  ];
   const gridStyle: React.CSSProperties = {
     gridTemplateColumns: colDefs.map((c) => c.width).join(' '),
   };
@@ -140,12 +144,15 @@ export function MyIssuesPage() {
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t('myIssues.title')}</h1>
           <p className="text-gray-400 dark:text-gray-500 text-sm mt-0.5">{t('myIssues.subtitle', { count: issues.length })}</p>
         </div>
-        <ExportButton
-          onExportExcel={handleExportExcel}
-          onExportPdf={handleExportPdf}
-          disabled={filtered.length === 0}
-          count={filtered.length}
-        />
+        <div className="flex items-center gap-2">
+          <ColumnManagerPopover />
+          <ExportButton
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+            disabled={filtered.length === 0}
+            count={filtered.length}
+          />
+        </div>
       </div>
 
       {/* ── Bulk action bar ── */}
@@ -253,15 +260,19 @@ export function MyIssuesPage() {
                 className="w-4 h-4 rounded text-blue-600 cursor-pointer" />
             </div>
             <span className="pl-3 py-2.5">{t('issue.titleLabel')}</span>
-            {cardFields.workflowStep && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">Workflow</span>}
-            {cardFields.environment && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">Env</span>}
-            <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.status')}</span>
-            {cardFields.priority  && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.priority')}</span>}
-            {cardFields.type      && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.type')}</span>}
-            {cardFields.dueDate   && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.dueDate')}</span>}
-            {cardFields.estimate  && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.estimate')}</span>}
-            {cardFields.assignee  && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.assignee')}</span>}
-            <span className="text-right px-3 py-2.5 whitespace-nowrap">{t('issue.updated')}</span>
+            {colDefs.slice(2).map((col) => {
+              const def = MY_ISSUES_COLUMN_DEFS[col.key];
+              if (!def) return null;
+              const isLast = col.key === 'updated';
+              return (
+                <span
+                  key={col.key}
+                  className={`${isLast ? 'text-right' : 'text-center'} px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis`}
+                >
+                  {def.label}
+                </span>
+              );
+            })}
           </div>
 
           {/* ── Rows ── */}
@@ -348,84 +359,75 @@ export function MyIssuesPage() {
                     )}
                   </div>
 
-                  {/* Workflow step */}
-                  {cardFields.workflowStep && (
-                    <div className="flex items-center justify-center px-3 py-3">
-                      {issue.currentStepName ? (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold border"
-                          style={{ background: (issue.currentStepColor ?? '#6b7280') + '20', color: issue.currentStepColor ?? '#6b7280', borderColor: (issue.currentStepColor ?? '#6b7280') + '50' }}>
-                          {issue.currentStepName}
-                        </span>
-                      ) : <span className="text-gray-200 dark:text-gray-700 text-xs">—</span>}
-                    </div>
-                  )}
-
-                  {/* Environment */}
-                  {cardFields.environment && (
-                    <div className="flex items-center justify-center px-3 py-3">
-                      {issue.environment ? (
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${envColor[issue.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-                          {issue.environment}
-                        </span>
-                      ) : <span className="text-gray-200 dark:text-gray-700 text-xs">—</span>}
-                    </div>
-                  )}
-
-                  {/* Status — always */}
-                  <div className="flex items-center justify-center px-3 py-3">
-                    <StatusBadge status={issue.status} />
-                  </div>
-
-                  {/* Priority */}
-                  {cardFields.priority && (
-                    <div className="flex items-center justify-center px-3 py-3">
-                      <PriorityBadge priority={issue.priority} />
-                    </div>
-                  )}
-
-                  {/* Type */}
-                  {cardFields.type && (
-                    <div className="flex items-center justify-center px-3 py-3">
-                      <TypeBadge type={issue.type} />
-                    </div>
-                  )}
-
-                  {/* Due date */}
-                  {cardFields.dueDate && (
-                    <div className="flex items-center justify-center px-3 py-3">
-                      {issue.dueDate ? (
-                        <span className={`flex items-center gap-0.5 text-xs font-medium ${overdue ? 'text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'}`}>
-                          <CalendarDays className="w-3 h-3" />{dueFmt(issue.dueDate)}
-                        </span>
-                      ) : <span className="text-gray-200 dark:text-gray-700 text-xs">—</span>}
-                    </div>
-                  )}
-
-                  {/* Estimate */}
-                  {cardFields.estimate && (
-                    <div className="flex items-center justify-center px-3 py-3">
-                      {issue.originalEstimateHours != null ? (
-                        <span className="flex items-center gap-0.5 text-xs text-gray-400 dark:text-gray-500">
-                          <Clock className="w-3 h-3" />{issue.originalEstimateHours}h
-                        </span>
-                      ) : <span className="text-gray-200 dark:text-gray-700 text-xs">—</span>}
-                    </div>
-                  )}
-
-                  {/* Assignee */}
-                  {cardFields.assignee && (
-                    <div className="flex items-center justify-center px-3 py-3">
-                      {issue.assignee
-                        ? <Avatar user={issue.assignee} size="xs" />
-                        : <div className="w-5 h-5 rounded-full border-2 border-dashed border-gray-200 dark:border-gray-600" />}
-                    </div>
-                  )}
-
-                  {/* Updated — always */}
-                  <div className="flex items-center justify-end gap-1 text-xs text-gray-400 dark:text-gray-500 px-3 py-3">
-                    <span>{formatDate(issue.updatedAt)}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-gray-200 dark:text-gray-600 group-hover:text-blue-400 flex-shrink-0" />
-                  </div>
+                  {/* Right-side cells — driven by ordered colDefs */}
+                  {colDefs.slice(2).map((col) => {
+                    if (col.key === 'workflow') return (
+                      <div key="workflow" className="flex items-center justify-center px-3 py-3">
+                        {issue.currentStepName ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold border"
+                            style={{ background: (issue.currentStepColor ?? '#6b7280') + '20', color: issue.currentStepColor ?? '#6b7280', borderColor: (issue.currentStepColor ?? '#6b7280') + '50' }}>
+                            {issue.currentStepName}
+                          </span>
+                        ) : <span className="text-gray-200 dark:text-gray-700 text-xs">—</span>}
+                      </div>
+                    );
+                    if (col.key === 'environment') return (
+                      <div key="environment" className="flex items-center justify-center px-3 py-3">
+                        {issue.environment ? (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${envColor[issue.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                            {issue.environment}
+                          </span>
+                        ) : <span className="text-gray-200 dark:text-gray-700 text-xs">—</span>}
+                      </div>
+                    );
+                    if (col.key === 'status') return (
+                      <div key="status" className="flex items-center justify-center px-3 py-3">
+                        <StatusBadge status={issue.status} />
+                      </div>
+                    );
+                    if (col.key === 'priority') return (
+                      <div key="priority" className="flex items-center justify-center px-3 py-3">
+                        <PriorityBadge priority={issue.priority} />
+                      </div>
+                    );
+                    if (col.key === 'type') return (
+                      <div key="type" className="flex items-center justify-center px-3 py-3">
+                        <TypeBadge type={issue.type} />
+                      </div>
+                    );
+                    if (col.key === 'dueDate') return (
+                      <div key="dueDate" className="flex items-center justify-center px-3 py-3">
+                        {issue.dueDate ? (
+                          <span className={`flex items-center gap-0.5 text-xs font-medium ${overdue ? 'text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                            <CalendarDays className="w-3 h-3" />{dueFmt(issue.dueDate)}
+                          </span>
+                        ) : <span className="text-gray-200 dark:text-gray-700 text-xs">—</span>}
+                      </div>
+                    );
+                    if (col.key === 'estimate') return (
+                      <div key="estimate" className="flex items-center justify-center px-3 py-3">
+                        {issue.originalEstimateHours != null ? (
+                          <span className="flex items-center gap-0.5 text-xs text-gray-400 dark:text-gray-500">
+                            <Clock className="w-3 h-3" />{issue.originalEstimateHours}h
+                          </span>
+                        ) : <span className="text-gray-200 dark:text-gray-700 text-xs">—</span>}
+                      </div>
+                    );
+                    if (col.key === 'assignee') return (
+                      <div key="assignee" className="flex items-center justify-center px-3 py-3">
+                        {issue.assignee
+                          ? <Avatar user={issue.assignee} size="xs" />
+                          : <div className="w-5 h-5 rounded-full border-2 border-dashed border-gray-200 dark:border-gray-600" />}
+                      </div>
+                    );
+                    if (col.key === 'updated') return (
+                      <div key="updated" className="flex items-center justify-end gap-1 text-xs text-gray-400 dark:text-gray-500 px-3 py-3">
+                        <span>{formatDate(issue.updatedAt)}</span>
+                        <ArrowRight className="w-3.5 h-3.5 text-gray-200 dark:text-gray-600 group-hover:text-blue-400 flex-shrink-0" />
+                      </div>
+                    );
+                    return null;
+                  })}
                 </div>
               );
             })}

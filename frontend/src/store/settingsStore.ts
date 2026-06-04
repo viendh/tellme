@@ -41,12 +41,28 @@ export const DEFAULT_CARD_FIELDS: CardFieldsConfig = {
   workflowStep: false,
 };
 
+/** Ordered list of configurable column IDs for My Issues table */
+export const MY_ISSUES_COLUMN_DEFS: Record<string, { label: string; width: string; cardField?: CardField; alwaysVisible?: boolean }> = {
+  workflow:    { label: 'Workflow',         cardField: 'workflowStep', width: '120px' },
+  environment: { label: 'ENV',              cardField: 'environment',  width: '72px'  },
+  status:      { label: 'Trạng thái',       alwaysVisible: true,       width: '120px' },
+  priority:    { label: 'Độ ưu tiên',       cardField: 'priority',     width: '100px' },
+  type:        { label: 'Loại',             cardField: 'type',         width: '80px'  },
+  dueDate:     { label: 'Hạn hoàn thành',   cardField: 'dueDate',      width: '130px' },
+  estimate:    { label: 'Ước tính',         cardField: 'estimate',     width: '110px' },
+  assignee:    { label: 'Người T.H.',       cardField: 'assignee',     width: '120px' },
+  updated:     { label: 'Cập nhật',         alwaysVisible: true,       width: '110px' },
+};
+
+export const DEFAULT_MY_ISSUES_COLUMN_ORDER = Object.keys(MY_ISSUES_COLUMN_DEFS);
+
 export interface DisplaySettings {
   theme: Theme;
   dateFormat: DateFormat;
   itemsPerPage: ItemsPerPage;
   compactMode: boolean;
   cardFields: CardFieldsConfig;
+  myIssuesColumnOrder: string[];
 }
 
 interface SettingsState extends DisplaySettings {
@@ -55,6 +71,7 @@ interface SettingsState extends DisplaySettings {
   setItemsPerPage: (n: ItemsPerPage) => void;
   setCompactMode: (v: boolean) => void;
   setCardField: (field: CardField, value: boolean) => void;
+  setMyIssuesColumnOrder: (order: string[]) => void;
   reset: () => void;
 }
 
@@ -64,6 +81,7 @@ const DEFAULTS: DisplaySettings = {
   itemsPerPage: 20,
   compactMode: false,
   cardFields: DEFAULT_CARD_FIELDS,
+  myIssuesColumnOrder: DEFAULT_MY_ISSUES_COLUMN_ORDER,
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -77,6 +95,7 @@ export const useSettingsStore = create<SettingsState>()(
       setCompactMode:  (compactMode)  => set({ compactMode }),
       setCardField: (field, value) =>
         set((s) => ({ cardFields: { ...s.cardFields, [field]: value } })),
+      setMyIssuesColumnOrder: (myIssuesColumnOrder) => set({ myIssuesColumnOrder }),
 
       reset: () => set({ ...DEFAULTS }),
     }),
