@@ -54,9 +54,9 @@ export function IssueDetailPage() {
         <span className="text-gray-900 font-medium">Issue #{id}</span>
       </div>
 
-      {/* Detail panel taking full height */}
-      <div className="flex-1 overflow-hidden max-w-3xl mx-auto w-full">
-        <IssueDetail issueId={id} onClose={() => navigate(-1)} />
+      {/* Detail panel taking full height — split layout (main left, comments right) */}
+      <div className="flex-1 overflow-hidden w-full">
+        <IssueDetail issueId={id} onClose={() => navigate(-1)} splitLayout />
       </div>
     </div>
   );

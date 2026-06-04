@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Trash2, ExternalLink, Loader2, ChevronDown, ChevronRight, Plus, Eye, ThumbsUp, Copy, ArrowRight, Tag } from 'lucide-react';
+import { X, Trash2, ExternalLink, Loader2, ChevronDown, ChevronRight, Plus, Eye, ThumbsUp, Copy, ArrowRight, Tag, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useIssue, useUpdateIssue, useDeleteIssue, useSubtasks, useCreateIssue } from '../../hooks/useIssues';
@@ -25,9 +25,10 @@ import type { IssueStatus, IssuePriority, IssueType, User } from '../../types';
 interface IssueDetailProps {
   issueId: number;
   onClose: () => void;
+  splitLayout?: boolean;
 }
 
-export function IssueDetail({ issueId, onClose }: IssueDetailProps) {
+export function IssueDetail({ issueId, onClose, splitLayout = false }: IssueDetailProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -330,8 +331,9 @@ export function IssueDetail({ issueId, onClose }: IssueDetailProps) {
         </div>
       </div>
 
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Body: split or single column */}
+      <div className={splitLayout ? 'flex flex-1 overflow-hidden' : 'flex-1 overflow-y-auto'}>
+        <div className={splitLayout ? 'flex-1 overflow-y-auto min-w-0' : undefined}>
         <div className="px-6 py-4 space-y-6">
           {/* Title */}
           <div>
@@ -796,17 +798,33 @@ export function IssueDetail({ issueId, onClose }: IssueDetailProps) {
           {/* Attachments */}
           <AttachmentSection issueId={issueId} />
 
-          <hr className="border-gray-200" />
+          {/* Comments — only shown inline in single-column mode */}
+          {!splitLayout && (
+            <>
+              <hr className="border-gray-200" />
+              <CommentSection issueId={issueId} />
+            </>
+          )}
 
-          {/* Comments */}
-          <CommentSection issueId={issueId} />
-
-          {/* Divider */}
           <hr className="border-gray-200" />
 
           {/* Activity */}
           <ActivityFeed issueId={issueId} />
         </div>
+        </div>
+
+        {/* Right panel: comments (split mode only) */}
+        {splitLayout && (
+          <div className="w-[380px] flex-shrink-0 border-l border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden bg-gray-50/40 dark:bg-gray-800/20">
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 flex items-center gap-2 bg-white dark:bg-gray-900">
+              <MessageSquare className="w-4 h-4 text-gray-400" />
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">{t('comment.title')}</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 py-4">
+              <CommentSection issueId={issueId} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Move Issue Modal */}
