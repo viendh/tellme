@@ -114,20 +114,22 @@ export function MyIssuesPage() {
     }
   };
 
-  /* ── Build dynamic grid columns ── */
-  const extraCols = [
-    cardFields.workflowStep,  // workflow step badge
-    cardFields.environment,   // env chip
-    true,                     // status — always
-    cardFields.priority,
-    cardFields.type,
-    cardFields.dueDate,
-    cardFields.estimate,
-    cardFields.assignee,
-    true,                     // updated — always
-  ].filter(Boolean);
+  /* ── Build dynamic grid columns — fixed px so header & rows always align ── */
+  const colDefs = [
+    { key: 'checkbox',    always: true,                    width: '40px'  },
+    { key: 'title',       always: true,                    width: '1fr'   },
+    { key: 'workflow',    always: cardFields.workflowStep, width: '120px' },
+    { key: 'environment', always: cardFields.environment,  width: '72px'  },
+    { key: 'status',      always: true,                    width: '120px' },
+    { key: 'priority',    always: cardFields.priority,     width: '100px' },
+    { key: 'type',        always: cardFields.type,         width: '80px'  },
+    { key: 'dueDate',     always: cardFields.dueDate,      width: '110px' },
+    { key: 'estimate',    always: cardFields.estimate,     width: '90px'  },
+    { key: 'assignee',    always: cardFields.assignee,     width: '80px'  },
+    { key: 'updated',     always: true,                    width: '110px' },
+  ].filter((c) => c.always);
   const gridStyle: React.CSSProperties = {
-    gridTemplateColumns: `auto 1fr ${extraCols.map(() => 'auto').join(' ')}`,
+    gridTemplateColumns: colDefs.map((c) => c.width).join(' '),
   };
 
   return (
@@ -271,7 +273,7 @@ export function MyIssuesPage() {
                 <div
                   key={issue.id}
                   style={gridStyle}
-                  className={`grid items-stretch transition-colors group cursor-pointer divide-x divide-gray-200 dark:divide-gray-700 ${
+                  className={`grid items-stretch transition-colors group cursor-pointer border-b border-gray-100 dark:border-gray-800 divide-x divide-gray-200 dark:divide-gray-700 ${
                     isSelected
                       ? 'bg-blue-50 dark:bg-blue-900/20'
                       : 'hover:bg-blue-50/40 dark:hover:bg-gray-800/60'
@@ -279,7 +281,7 @@ export function MyIssuesPage() {
                   onClick={() => navigate(`/issues/${issue.id}`)}
                 >
                   {/* Checkbox */}
-                  <div className="flex items-center px-4">
+                  <div className="flex items-center justify-center">
                     <input type="checkbox" checked={isSelected}
                       onChange={() => toggleOne(issue.id)}
                       onClick={(e) => e.stopPropagation()}
