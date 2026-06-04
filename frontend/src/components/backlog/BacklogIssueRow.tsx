@@ -4,7 +4,8 @@ import { MessageSquare, Clock, Layers } from 'lucide-react';
 import type { Issue } from '../../types';
 import { TypeIcon, PriorityIcon, StatusBadge } from '../common/Badge';
 import { Avatar } from '../common/Avatar';
-import { useSettingsStore } from '../../store/settingsStore';
+import { useSettingsStore, BACKLOG_COLUMN_DEFS } from '../../store/settingsStore';
+import type { CardField, CardFieldsConfig } from '../../store/settingsStore';
 
 interface BacklogIssueRowProps {
   issue: Issue;
@@ -36,7 +37,8 @@ const BASE_PX = 16;
 const INDENT_PX = 28;
 
 export function BacklogIssueRow({ issue, onClick, depth = 0 }: BacklogIssueRowProps) {
-  const cardFields = useSettingsStore((s) => s.cardFields);
+  const cardFields    = useSettingsStore((s) => s.cardFields);
+  const columnOrder   = useSettingsStore((s) => s.backlogColumnOrder);
 
   const {
     attributes, listeners, setNodeRef, transform, transition, isDragging,
@@ -81,133 +83,111 @@ export function BacklogIssueRow({ issue, onClick, depth = 0 }: BacklogIssueRowPr
           </span>
         </div>
 
-        {/* Right-side chips — fixed-width columns with dividers */}
+        {/* Right-side chips — ordered by backlogColumnOrder */}
         <div className="flex items-center flex-shrink-0 divide-x divide-gray-100">
+          {columnOrder.map((id) => {
+            const def = BACKLOG_COLUMN_DEFS[id];
+            if (!def) return null;
+            const visible = def.alwaysVisible ?? (def.cardField ? (cardFields as CardFieldsConfig)[def.cardField as CardField] : true);
+            if (!visible) return null;
 
-          {/* Col: Workflow step */}
-          {cardFields.workflowStep && (
-            <div className="px-2 flex justify-center min-w-[80px]">
-              {issue.currentStepName ? (
-                <span
-                  className="text-[10px] px-2 py-0.5 rounded-full font-semibold border"
-                  style={{
-                    background: (issue.currentStepColor ?? '#6b7280') + '20',
-                    color: issue.currentStepColor ?? '#6b7280',
-                    borderColor: (issue.currentStepColor ?? '#6b7280') + '50',
-                  }}
-                >
-                  {issue.currentStepName}
-                </span>
-              ) : <span className="text-gray-200 text-xs">—</span>}
-            </div>
-          )}
-
-          {/* Col: Environment */}
-          {cardFields.environment && (
-            <div className="px-2 flex justify-center w-14">
-              {issue.environment ? (
-                <span className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${envColor[issue.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-                  {issue.environment}
-                </span>
-              ) : <span className="text-gray-200 text-xs">—</span>}
-            </div>
-          )}
-
-          {/* Col: Module */}
-          {cardFields.module && (
-            <div className="px-2 flex justify-center min-w-[64px]">
-              {issue.module ? (
-                <span className="flex items-center gap-1 text-[10px] text-gray-400">
-                  <Layers className="w-3 h-3" />{issue.module}
-                </span>
-              ) : <span className="text-gray-200 text-xs">—</span>}
-            </div>
-          )}
-
-          {/* Col: Estimate */}
-          {cardFields.estimate && (
-            <div className="px-2 flex justify-center w-14">
-              {issue.originalEstimateHours != null ? (
-                <span className="flex items-center gap-1 text-[10px] text-gray-400">
-                  <Clock className="w-3 h-3" />{issue.originalEstimateHours}h
-                </span>
-              ) : <span className="text-gray-200 text-xs">—</span>}
-            </div>
-          )}
-
-          {/* Col: Labels */}
-          {cardFields.labels && (
-            <div className="px-2 flex justify-center min-w-[60px]">
-              {issue.labels ? (
-                <div className="flex gap-1">
-                  {issue.labels.split(',').filter(Boolean).slice(0, 2).map((l) => (
-                    <span key={l} className="text-[10px] px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-full">
-                      {l.trim()}
-                    </span>
-                  ))}
-                </div>
-              ) : <span className="text-gray-200 text-xs">—</span>}
-            </div>
-          )}
-
-          {/* Col: Progress */}
-          {cardFields.progress && (
-            <div className="px-2 flex justify-center w-16">
-              {issue.progressPercent != null && issue.progressPercent > 0 ? (
-                <div className="w-14 bg-gray-100 rounded-full h-1">
-                  <div className="bg-blue-500 h-1 rounded-full" style={{ width: `${Math.min(100, issue.progressPercent)}%` }} />
-                </div>
-              ) : <span className="text-gray-200 text-xs">—</span>}
-            </div>
-          )}
-
-          {/* Col: Due date */}
-          {cardFields.dueDate && (
-            <div className="px-2 flex justify-center w-14">
-              {issue.dueDate ? (
-                <span className={`text-xs font-medium ${isOverdue(issue.dueDate) ? 'text-red-600' : 'text-gray-400'}`}>
-                  {formatDueDateShort(issue.dueDate)}
-                </span>
-              ) : <span className="text-gray-200 text-xs">—</span>}
-            </div>
-          )}
-
-          {/* Col: Severity */}
-          {cardFields.severity && (
-            <div className="px-2 flex justify-center w-8">
-              {issue.severity && issue.severity !== 'MINOR' ? (
-                <span title={issue.severity} className={`w-2 h-2 rounded-full ${severityDot[issue.severity]}`} />
-              ) : <span className="text-gray-200 text-xs">—</span>}
-            </div>
-          )}
-
-          {/* Col: Priority */}
-          {cardFields.priority && (
-            <div className="px-2 flex justify-center w-8">
-              <PriorityIcon priority={issue.priority} />
-            </div>
-          )}
-
-          {/* Col: Status — always visible */}
-          <div className="px-2 flex justify-center w-28">
-            <StatusBadge status={issue.status} />
-          </div>
-
-          {/* Col: Issue ID */}
-          {cardFields.issueId && (
-            <div className="px-2 flex justify-center w-12">
-              <span className="text-xs text-gray-400 font-mono">#{issue.id}</span>
-            </div>
-          )}
-
-          {/* Col: Assignee — always visible */}
-          <div className="px-2 flex justify-center w-9">
-            {cardFields.assignee ? (
-              issue.assignee
-                ? <Avatar user={issue.assignee} size="xs" />
-                : <div className="w-5 h-5 rounded-full border-2 border-dashed border-gray-300" />
-            ) : <div className="w-5 h-5" />}
-          </div>
+            if (id === 'workflow') return (
+              <div key="workflow" className="px-2 flex justify-center" style={{ width: def.width }}>
+                {issue.currentStepName ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold border"
+                    style={{ background: (issue.currentStepColor ?? '#6b7280') + '20', color: issue.currentStepColor ?? '#6b7280', borderColor: (issue.currentStepColor ?? '#6b7280') + '50' }}>
+                    {issue.currentStepName}
+                  </span>
+                ) : <span className="text-gray-200 text-xs">—</span>}
+              </div>
+            );
+            if (id === 'environment') return (
+              <div key="environment" className="px-2 flex justify-center" style={{ width: def.width }}>
+                {issue.environment ? (
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${envColor[issue.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                    {issue.environment}
+                  </span>
+                ) : <span className="text-gray-200 text-xs">—</span>}
+              </div>
+            );
+            if (id === 'module') return (
+              <div key="module" className="px-2 flex justify-center" style={{ width: def.width }}>
+                {issue.module ? (
+                  <span className="flex items-center gap-1 text-[10px] text-gray-400">
+                    <Layers className="w-3 h-3" />{issue.module}
+                  </span>
+                ) : <span className="text-gray-200 text-xs">—</span>}
+              </div>
+            );
+            if (id === 'estimate') return (
+              <div key="estimate" className="px-2 flex justify-center" style={{ width: def.width }}>
+                {issue.originalEstimateHours != null ? (
+                  <span className="flex items-center gap-1 text-[10px] text-gray-400">
+                    <Clock className="w-3 h-3" />{issue.originalEstimateHours}h
+                  </span>
+                ) : <span className="text-gray-200 text-xs">—</span>}
+              </div>
+            );
+            if (id === 'labels') return (
+              <div key="labels" className="px-2 flex justify-center" style={{ width: def.width }}>
+                {issue.labels ? (
+                  <div className="flex gap-1">
+                    {issue.labels.split(',').filter(Boolean).slice(0, 2).map((l) => (
+                      <span key={l} className="text-[10px] px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-full">{l.trim()}</span>
+                    ))}
+                  </div>
+                ) : <span className="text-gray-200 text-xs">—</span>}
+              </div>
+            );
+            if (id === 'progress') return (
+              <div key="progress" className="px-2 flex justify-center" style={{ width: def.width }}>
+                {issue.progressPercent != null && issue.progressPercent > 0 ? (
+                  <div className="w-12 bg-gray-100 rounded-full h-1">
+                    <div className="bg-blue-500 h-1 rounded-full" style={{ width: `${Math.min(100, issue.progressPercent)}%` }} />
+                  </div>
+                ) : <span className="text-gray-200 text-xs">—</span>}
+              </div>
+            );
+            if (id === 'dueDate') return (
+              <div key="dueDate" className="px-2 flex justify-center" style={{ width: def.width }}>
+                {issue.dueDate ? (
+                  <span className={`text-xs font-medium ${isOverdue(issue.dueDate) ? 'text-red-600' : 'text-gray-400'}`}>
+                    {formatDueDateShort(issue.dueDate)}
+                  </span>
+                ) : <span className="text-gray-200 text-xs">—</span>}
+              </div>
+            );
+            if (id === 'severity') return (
+              <div key="severity" className="px-2 flex justify-center" style={{ width: def.width }}>
+                {issue.severity && issue.severity !== 'MINOR'
+                  ? <span title={issue.severity} className={`w-2 h-2 rounded-full ${severityDot[issue.severity]}`} />
+                  : <span className="text-gray-200 text-xs">—</span>}
+              </div>
+            );
+            if (id === 'priority') return (
+              <div key="priority" className="px-2 flex justify-center" style={{ width: def.width }}>
+                <PriorityIcon priority={issue.priority} />
+              </div>
+            );
+            if (id === 'status') return (
+              <div key="status" className="px-2 flex justify-center" style={{ width: def.width }}>
+                <StatusBadge status={issue.status} />
+              </div>
+            );
+            if (id === 'issueId') return (
+              <div key="issueId" className="px-2 flex justify-center" style={{ width: def.width }}>
+                <span className="text-xs text-gray-400 font-mono">#{issue.id}</span>
+              </div>
+            );
+            if (id === 'assignee') return (
+              <div key="assignee" className="px-2 flex justify-center" style={{ width: def.width }}>
+                {issue.assignee
+                  ? <Avatar user={issue.assignee} size="xs" />
+                  : <div className="w-5 h-5 rounded-full border-2 border-dashed border-gray-300" />}
+              </div>
+            );
+            return null;
+          })}
         </div>
       </div>
 

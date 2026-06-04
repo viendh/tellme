@@ -12,6 +12,7 @@ import { IssueForm } from '../components/issue/IssueForm';
 import { Modal } from '../components/common/Modal';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
+import { ColumnManagerPopover } from '../components/common/ColumnManagerPopover';
 import type { Issue } from '../types';
 
 interface CreateSprintForm {
@@ -103,6 +104,7 @@ export function BacklogPage() {
                 Burndown
               </button>
             )}
+            <ColumnManagerPopover storeKey="backlog" />
             <Button size="sm" variant="secondary" onClick={() => setShowSprintModal(true)}>
               <Plus className="w-4 h-4" />{t('backlog.createSprint')}
             </Button>

@@ -19,8 +19,22 @@ import {
   useSettingsStore,
   MY_ISSUES_COLUMN_DEFS,
   DEFAULT_MY_ISSUES_COLUMN_ORDER,
+  BACKLOG_COLUMN_DEFS,
+  DEFAULT_BACKLOG_COLUMN_ORDER,
 } from '../../store/settingsStore';
-import type { CardField } from '../../store/settingsStore';
+import type { CardField, CardFieldsConfig } from '../../store/settingsStore';
+
+type StoreKey = 'myIssues' | 'backlog';
+
+const STORE_CONFIG: Record<StoreKey, {
+  defs: Record<string, { label: string; width: string; cardField?: CardField; alwaysVisible?: boolean }>;
+  defaultOrder: string[];
+}> = {
+  myIssues: { defs: MY_ISSUES_COLUMN_DEFS, defaultOrder: DEFAULT_MY_ISSUES_COLUMN_ORDER },
+  backlog:  { defs: BACKLOG_COLUMN_DEFS,   defaultOrder: DEFAULT_BACKLOG_COLUMN_ORDER  },
+};
+
+// ── Sortable item ────────────────────────────────────────────────────────────
 
 interface SortableColumnItemProps {
   id: string;
@@ -37,9 +51,8 @@ function SortableColumnItem({ id, label, visible, alwaysVisible, onToggle }: Sor
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
-      className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 group"
+      className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800"
     >
-      {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
@@ -48,12 +61,10 @@ function SortableColumnItem({ id, label, visible, alwaysVisible, onToggle }: Sor
         <GripVertical className="w-3.5 h-3.5" />
       </button>
 
-      {/* Label */}
       <span className={`flex-1 text-xs font-medium ${visible ? 'text-gray-700 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'}`}>
         {label}
       </span>
 
-      {/* Toggle */}
       {alwaysVisible ? (
         <span title="Không thể ẩn" className="text-gray-300 dark:text-gray-600 flex-shrink-0">
           <Lock className="w-3.5 h-3.5" />
@@ -71,20 +82,30 @@ function SortableColumnItem({ id, label, visible, alwaysVisible, onToggle }: Sor
   );
 }
 
+// ── Main component ───────────────────────────────────────────────────────────
+
 interface ColumnManagerPopoverProps {
+  storeKey?: StoreKey;
   className?: string;
 }
 
-export function ColumnManagerPopover({ className = '' }: ColumnManagerPopoverProps) {
+export function ColumnManagerPopover({ storeKey = 'myIssues', className = '' }: ColumnManagerPopoverProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const cardFields    = useSettingsStore((s) => s.cardFields);
   const setCardField  = useSettingsStore((s) => s.setCardField);
-  const columnOrder   = useSettingsStore((s) => s.myIssuesColumnOrder);
-  const setColumnOrder = useSettingsStore((s) => s.setMyIssuesColumnOrder);
 
-  // Close on outside click
+  const myIssuesColumnOrder   = useSettingsStore((s) => s.myIssuesColumnOrder);
+  const setMyIssuesColumnOrder = useSettingsStore((s) => s.setMyIssuesColumnOrder);
+  const backlogColumnOrder    = useSettingsStore((s) => s.backlogColumnOrder);
+  const setBacklogColumnOrder  = useSettingsStore((s) => s.setBacklogColumnOrder);
+
+  const columnOrder    = storeKey === 'myIssues' ? myIssuesColumnOrder : backlogColumnOrder;
+  const setColumnOrder = storeKey === 'myIssues' ? setMyIssuesColumnOrder : setBacklogColumnOrder;
+
+  const { defs, defaultOrder } = STORE_CONFIG[storeKey];
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -106,19 +127,15 @@ export function ColumnManagerPopover({ className = '' }: ColumnManagerPopoverPro
   };
 
   const toggleColumn = (id: string) => {
-    const def = MY_ISSUES_COLUMN_DEFS[id];
+    const def = defs[id];
     if (!def?.cardField) return;
-    setCardField(def.cardField as CardField, !cardFields[def.cardField as CardField]);
-  };
-
-  const resetToDefault = () => {
-    setColumnOrder(DEFAULT_MY_ISSUES_COLUMN_ORDER);
+    setCardField(def.cardField as CardField, !(cardFields as CardFieldsConfig)[def.cardField as CardField]);
   };
 
   const visibleCount = columnOrder.filter((id) => {
-    const def = MY_ISSUES_COLUMN_DEFS[id];
+    const def = defs[id];
     if (!def) return false;
-    return def.alwaysVisible ?? (def.cardField ? cardFields[def.cardField as CardField] : true);
+    return def.alwaysVisible ?? (def.cardField ? (cardFields as CardFieldsConfig)[def.cardField as CardField] : true);
   }).length;
 
   return (
@@ -139,12 +156,11 @@ export function ColumnManagerPopover({ className = '' }: ColumnManagerPopoverPro
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden">
-          {/* Header */}
+        <div className="absolute right-0 top-full mt-1.5 w-52 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden">
           <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-100 dark:border-gray-800">
             <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">Quản lý cột</span>
             <button
-              onClick={resetToDefault}
+              onClick={() => setColumnOrder(defaultOrder)}
               title="Đặt lại mặc định"
               className="text-gray-400 hover:text-blue-500 transition-colors"
             >
@@ -152,14 +168,13 @@ export function ColumnManagerPopover({ className = '' }: ColumnManagerPopoverPro
             </button>
           </div>
 
-          {/* Sortable list */}
-          <div className="px-1 py-1.5 max-h-72 overflow-y-auto">
+          <div className="px-1 py-1.5 max-h-80 overflow-y-auto">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
                 {columnOrder.map((id) => {
-                  const def = MY_ISSUES_COLUMN_DEFS[id];
+                  const def = defs[id];
                   if (!def) return null;
-                  const visible = def.alwaysVisible ?? (def.cardField ? cardFields[def.cardField as CardField] : true);
+                  const visible = def.alwaysVisible ?? (def.cardField ? (cardFields as CardFieldsConfig)[def.cardField as CardField] : true);
                   return (
                     <SortableColumnItem
                       key={id}
@@ -175,8 +190,8 @@ export function ColumnManagerPopover({ className = '' }: ColumnManagerPopoverPro
             </DndContext>
           </div>
 
-          <div className="px-3 py-2 border-t border-gray-100 dark:border-gray-800 text-[10px] text-gray-400 dark:text-gray-500">
-            Kéo <GripVertical className="w-3 h-3 inline" /> để sắp xếp · <Eye className="w-3 h-3 inline" /> để ẩn/hiện
+          <div className="px-3 py-2 border-t border-gray-100 dark:border-gray-800 text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1">
+            Kéo <GripVertical className="w-3 h-3" /> để sắp xếp
           </div>
         </div>
       )}

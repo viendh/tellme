@@ -56,6 +56,24 @@ export const MY_ISSUES_COLUMN_DEFS: Record<string, { label: string; width: strin
 
 export const DEFAULT_MY_ISSUES_COLUMN_ORDER = Object.keys(MY_ISSUES_COLUMN_DEFS);
 
+/** Configurable right-side column IDs for the Backlog row */
+export const BACKLOG_COLUMN_DEFS: Record<string, { label: string; width: string; cardField?: CardField; alwaysVisible?: boolean }> = {
+  workflow:    { label: 'Workflow',       cardField: 'workflowStep', width: '100px' },
+  environment: { label: 'ENV',            cardField: 'environment',  width: '60px'  },
+  module:      { label: 'Module',         cardField: 'module',       width: '80px'  },
+  estimate:    { label: 'Ước tính',       cardField: 'estimate',     width: '64px'  },
+  labels:      { label: 'Nhãn',           cardField: 'labels',       width: '80px'  },
+  progress:    { label: 'Tiến độ',        cardField: 'progress',     width: '72px'  },
+  dueDate:     { label: 'Hạn',            cardField: 'dueDate',      width: '56px'  },
+  severity:    { label: 'Mức độ',         cardField: 'severity',     width: '40px'  },
+  priority:    { label: 'Ưu tiên',        cardField: 'priority',     width: '40px'  },
+  status:      { label: 'Trạng thái',     alwaysVisible: true,       width: '120px' },
+  issueId:     { label: '#ID',            cardField: 'issueId',      width: '52px'  },
+  assignee:    { label: 'Người T.H.',     alwaysVisible: true,       width: '40px'  },
+};
+
+export const DEFAULT_BACKLOG_COLUMN_ORDER = Object.keys(BACKLOG_COLUMN_DEFS);
+
 export interface DisplaySettings {
   theme: Theme;
   dateFormat: DateFormat;
@@ -63,6 +81,7 @@ export interface DisplaySettings {
   compactMode: boolean;
   cardFields: CardFieldsConfig;
   myIssuesColumnOrder: string[];
+  backlogColumnOrder: string[];
 }
 
 interface SettingsState extends DisplaySettings {
@@ -72,6 +91,7 @@ interface SettingsState extends DisplaySettings {
   setCompactMode: (v: boolean) => void;
   setCardField: (field: CardField, value: boolean) => void;
   setMyIssuesColumnOrder: (order: string[]) => void;
+  setBacklogColumnOrder: (order: string[]) => void;
   reset: () => void;
 }
 
@@ -82,6 +102,7 @@ const DEFAULTS: DisplaySettings = {
   compactMode: false,
   cardFields: DEFAULT_CARD_FIELDS,
   myIssuesColumnOrder: DEFAULT_MY_ISSUES_COLUMN_ORDER,
+  backlogColumnOrder: DEFAULT_BACKLOG_COLUMN_ORDER,
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -96,6 +117,7 @@ export const useSettingsStore = create<SettingsState>()(
       setCardField: (field, value) =>
         set((s) => ({ cardFields: { ...s.cardFields, [field]: value } })),
       setMyIssuesColumnOrder: (myIssuesColumnOrder) => set({ myIssuesColumnOrder }),
+      setBacklogColumnOrder:  (backlogColumnOrder)  => set({ backlogColumnOrder }),
 
       reset: () => set({ ...DEFAULTS }),
     }),
