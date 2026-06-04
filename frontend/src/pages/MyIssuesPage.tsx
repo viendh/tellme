@@ -123,9 +123,9 @@ export function MyIssuesPage() {
     { key: 'status',      always: true,                    width: '120px' },
     { key: 'priority',    always: cardFields.priority,     width: '100px' },
     { key: 'type',        always: cardFields.type,         width: '80px'  },
-    { key: 'dueDate',     always: cardFields.dueDate,      width: '110px' },
-    { key: 'estimate',    always: cardFields.estimate,     width: '90px'  },
-    { key: 'assignee',    always: cardFields.assignee,     width: '80px'  },
+    { key: 'dueDate',     always: cardFields.dueDate,      width: '130px' },
+    { key: 'estimate',    always: cardFields.estimate,     width: '110px' },
+    { key: 'assignee',    always: cardFields.assignee,     width: '120px' },
     { key: 'updated',     always: true,                    width: '110px' },
   ].filter((c) => c.always);
   const gridStyle: React.CSSProperties = {
@@ -253,15 +253,15 @@ export function MyIssuesPage() {
                 className="w-4 h-4 rounded text-blue-600 cursor-pointer" />
             </div>
             <span className="pl-3 py-2.5">{t('issue.titleLabel')}</span>
-            {cardFields.workflowStep && <span className="text-center px-3 py-2.5">Workflow</span>}
-            {cardFields.environment && <span className="text-center px-3 py-2.5">Env</span>}
-            <span className="text-center px-3 py-2.5">{t('issue.status')}</span>
-            {cardFields.priority  && <span className="text-center px-3 py-2.5">{t('issue.priority')}</span>}
-            {cardFields.type      && <span className="text-center px-3 py-2.5">{t('issue.type')}</span>}
-            {cardFields.dueDate   && <span className="text-center px-3 py-2.5">{t('issue.dueDate')}</span>}
-            {cardFields.estimate  && <span className="text-center px-3 py-2.5">{t('issue.estimate')}</span>}
-            {cardFields.assignee  && <span className="text-center px-3 py-2.5">{t('issue.assignee')}</span>}
-            <span className="text-right px-3 py-2.5">{t('issue.updated')}</span>
+            {cardFields.workflowStep && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">Workflow</span>}
+            {cardFields.environment && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">Env</span>}
+            <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.status')}</span>
+            {cardFields.priority  && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.priority')}</span>}
+            {cardFields.type      && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.type')}</span>}
+            {cardFields.dueDate   && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.dueDate')}</span>}
+            {cardFields.estimate  && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.estimate')}</span>}
+            {cardFields.assignee  && <span className="text-center px-3 py-2.5 whitespace-nowrap overflow-hidden text-ellipsis">{t('issue.assignee')}</span>}
+            <span className="text-right px-3 py-2.5 whitespace-nowrap">{t('issue.updated')}</span>
           </div>
 
           {/* ── Rows ── */}

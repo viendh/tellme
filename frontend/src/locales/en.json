@@ -247,6 +247,7 @@
   "issue.modulePlaceholder": "AP / AR / GL / INV...",
   "issue.sprint": "Sprint",
   "issue.assignee": "Assignee",
+  "issue.estimate": "Estimate",
   "issue.startDate": "Start Date",
   "issue.dueDate": "Due Date",
   "issue.estimateHours": "Estimate (hours)",
