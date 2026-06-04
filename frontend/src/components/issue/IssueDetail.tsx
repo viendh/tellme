@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Trash2, ExternalLink, Loader2, ChevronDown, ChevronRight, Plus, Eye, ThumbsUp, Copy, ArrowRight, Tag, MessageSquare } from 'lucide-react';
+import { X, Trash2, ExternalLink, Loader2, ChevronDown, ChevronRight, Plus, Eye, ThumbsUp, Copy, ArrowRight, Tag, MessageSquare, Search, Link2Off, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useIssue, useUpdateIssue, useDeleteIssue, useSubtasks, useCreateIssue } from '../../hooks/useIssues';
+import { useIssue, useUpdateIssue, useDeleteIssue, useSubtasks, useCreateIssue, useIssues } from '../../hooks/useIssues';
 import { useToggleWatch, useToggleVote, useCloneIssue, useMoveIssue, useUpdateLabels } from '../../hooks/useIssueFeatures';
 import { useConfirm } from '../../context/ConfirmContext';
 import { useSprints } from '../../hooks/useSprints';
@@ -51,6 +51,10 @@ export function IssueDetail({ issueId, onClose, splitLayout = false }: IssueDeta
   const [showSubtaskModal, setShowSubtaskModal] = useState(false);
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [moveTargetProjectId, setMoveTargetProjectId] = useState('');
+  const [parentSearchOpen, setParentSearchOpen] = useState(false);
+  const [parentQuery, setParentQuery] = useState('');
+
+  const { data: projectIssues = [] } = useIssues(projectId);
 
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleValue, setTitleValue] = useState('');
@@ -202,6 +206,24 @@ export function IssueDetail({ issueId, onClose, splitLayout = false }: IssueDeta
     updateLabels.mutate(labelsValue);
     setEditingLabels(false);
   };
+
+  const handleParentChange = (parentIssueId: number) => {
+    updateIssue.mutate({ parentIssueId });
+    setParentSearchOpen(false);
+    setParentQuery('');
+  };
+
+  const handleParentClear = () => {
+    updateIssue.mutate({ clearParentIssue: true });
+  };
+
+  const parentCandidates = projectIssues.filter((i) =>
+    i.id !== issueId &&
+    !i.parentIssueId &&
+    (parentQuery === '' ||
+      i.title.toLowerCase().includes(parentQuery.toLowerCase()) ||
+      (i.issueKey ?? '').toLowerCase().includes(parentQuery.toLowerCase()))
+  ).slice(0, 8);
 
   if (isLoading) {
     return (
@@ -520,18 +542,79 @@ export function IssueDetail({ issueId, onClose, splitLayout = false }: IssueDeta
             <PriorityBadge priority={issue.priority} />
           </div>
 
-          {/* Parent issue (read-only) */}
-          {issue.parentIssueTitle && (
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-1">{t('issue.parentIssue')}</p>
+          {/* Parent issue — editable */}
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">{t('issue.parentIssue')}</p>
+
+            {parentSearchOpen ? (
+              <div className="relative">
+                <div className="flex items-center gap-1.5 border border-blue-400 rounded-lg px-2.5 py-1.5 bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500">
+                  <Search className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                  <input
+                    autoFocus
+                    value={parentQuery}
+                    onChange={(e) => setParentQuery(e.target.value)}
+                    placeholder="Tìm issue cha..."
+                    className="flex-1 text-sm bg-transparent outline-none text-gray-800 dark:text-white placeholder:text-gray-400"
+                  />
+                  <button onClick={() => { setParentSearchOpen(false); setParentQuery(''); }} className="text-gray-400 hover:text-gray-600">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {parentCandidates.length > 0 && (
+                  <div className="absolute top-full mt-1 left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-30 overflow-hidden max-h-56 overflow-y-auto">
+                    {parentCandidates.map((candidate) => (
+                      <button
+                        key={candidate.id}
+                        onClick={() => handleParentChange(candidate.id)}
+                        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 text-left transition-colors"
+                      >
+                        <span className="text-[11px] font-mono text-gray-400 shrink-0">{candidate.issueKey ?? `#${candidate.id}`}</span>
+                        <span className="text-sm text-gray-800 dark:text-gray-200 truncate">{candidate.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {parentQuery.length > 0 && parentCandidates.length === 0 && (
+                  <div className="absolute top-full mt-1 left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-30 px-3 py-3 text-sm text-gray-400 text-center">
+                    Không tìm thấy issue
+                  </div>
+                )}
+              </div>
+            ) : issue.parentIssueTitle ? (
+              <div className="flex items-center gap-2 group">
+                <button
+                  onClick={() => navigate(`/issues/${issue.parentIssueId}`)}
+                  className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  <span className="text-[11px] font-mono text-gray-400">{issue.issueKey?.split('.')[0]}-{(issue.issueKey ?? '').split('.')[1]}</span>
+                  {issue.parentIssueTitle}
+                </button>
+                <button
+                  onClick={() => setParentSearchOpen(true)}
+                  title="Đổi issue cha"
+                  className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                >
+                  <Pencil className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={handleParentClear}
+                  title="Xóa liên kết issue cha"
+                  className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                >
+                  <Link2Off className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
               <button
-                onClick={() => navigate(`/issues/${issue.parentIssueId}`)}
-                className="text-sm text-blue-600 hover:underline text-left"
+                onClick={() => setParentSearchOpen(true)}
+                className="text-sm text-gray-400 italic hover:text-blue-500 transition-colors flex items-center gap-1"
               >
-                {issue.parentIssueTitle}
+                <Plus className="w-3.5 h-3.5" />
+                Gán issue cha
               </button>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Sub-tasks */}
           <div className="border border-gray-200 rounded-lg overflow-hidden">

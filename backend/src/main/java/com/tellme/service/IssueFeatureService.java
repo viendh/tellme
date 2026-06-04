@@ -204,7 +204,8 @@ public class IssueFeatureService {
 
         Issue clone = Issue.builder()
                 .project(original.getProject())
-                .sprint(null) // clone starts in backlog
+                .sprint(original.getSprint())          // same sprint as original
+                .parentIssue(original.getParentIssue()) // same level (same parent)
                 .title("[Clone] " + original.getTitle())
                 .description(original.getDescription())
                 .type(original.getType())

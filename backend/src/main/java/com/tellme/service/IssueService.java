@@ -362,7 +362,9 @@ public class IssueService {
         if (request.getSeverity() != null) {
             issue.setSeverity(request.getSeverity());
         }
-        if (request.getParentIssueId() != null) {
+        if (Boolean.TRUE.equals(request.getClearParentIssue())) {
+            issue.setParentIssue(null);
+        } else if (request.getParentIssueId() != null) {
             issueRepository.findById(request.getParentIssueId()).ifPresent(issue::setParentIssue);
         }
         if (request.getModule() != null) {

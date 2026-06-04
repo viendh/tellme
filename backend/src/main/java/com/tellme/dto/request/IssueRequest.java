@@ -34,6 +34,9 @@ public class IssueRequest {
 
     private Long parentIssueId;
 
+    /** Set to true to explicitly remove parent (set parentIssue = null) */
+    private Boolean clearParentIssue;
+
     private String module;
 
     private IssueEnvironment environment;

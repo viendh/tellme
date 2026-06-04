@@ -295,6 +295,7 @@ export interface UpdateIssueInput {
   sprintId?: number | null;
   severity?: 'MINOR' | 'MAJOR' | 'CRITICAL';
   parentIssueId?: number;
+  clearParentIssue?: boolean;
   module?: string;
   environment?: 'DEV' | 'UAT' | 'PROD';
   businessImpact?: string;
