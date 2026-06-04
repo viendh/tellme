@@ -244,20 +244,22 @@ export function MyIssuesPage() {
           {/* ── Table header ── */}
           <div
             style={gridStyle}
-            className="grid px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 text-[11px] font-semibold text-gray-400 uppercase tracking-wide items-center divide-x divide-gray-200 dark:divide-gray-700"
+            className="grid bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 text-[11px] font-semibold text-gray-400 uppercase tracking-wide items-center divide-x divide-gray-200 dark:divide-gray-700"
           >
-            <input type="checkbox" checked={allVisibleSelected} onChange={toggleAll}
-              className="w-4 h-4 rounded text-blue-600 cursor-pointer" />
-            <span className="pl-3">{t('issue.titleLabel')}</span>
-            {cardFields.workflowStep && <span className="text-center px-2">Workflow</span>}
-            {cardFields.environment && <span className="text-center px-2">Env</span>}
-            <span className="text-center px-2">{t('issue.status')}</span>
-            {cardFields.priority  && <span className="text-center px-2">{t('issue.priority')}</span>}
-            {cardFields.type      && <span className="text-center px-2">{t('issue.type')}</span>}
-            {cardFields.dueDate   && <span className="text-center px-2">{t('issue.dueDate')}</span>}
-            {cardFields.estimate  && <span className="text-center px-2">{t('issue.estimate')}</span>}
-            {cardFields.assignee  && <span className="text-center px-2">{t('issue.assignee')}</span>}
-            <span className="text-right px-2">{t('issue.updated')}</span>
+            <div className="flex items-center px-4 py-2.5">
+              <input type="checkbox" checked={allVisibleSelected} onChange={toggleAll}
+                className="w-4 h-4 rounded text-blue-600 cursor-pointer" />
+            </div>
+            <span className="pl-3 py-2.5">{t('issue.titleLabel')}</span>
+            {cardFields.workflowStep && <span className="text-center px-3 py-2.5">Workflow</span>}
+            {cardFields.environment && <span className="text-center px-3 py-2.5">Env</span>}
+            <span className="text-center px-3 py-2.5">{t('issue.status')}</span>
+            {cardFields.priority  && <span className="text-center px-3 py-2.5">{t('issue.priority')}</span>}
+            {cardFields.type      && <span className="text-center px-3 py-2.5">{t('issue.type')}</span>}
+            {cardFields.dueDate   && <span className="text-center px-3 py-2.5">{t('issue.dueDate')}</span>}
+            {cardFields.estimate  && <span className="text-center px-3 py-2.5">{t('issue.estimate')}</span>}
+            {cardFields.assignee  && <span className="text-center px-3 py-2.5">{t('issue.assignee')}</span>}
+            <span className="text-right px-3 py-2.5">{t('issue.updated')}</span>
           </div>
 
           {/* ── Rows ── */}
@@ -269,7 +271,7 @@ export function MyIssuesPage() {
                 <div
                   key={issue.id}
                   style={gridStyle}
-                  className={`grid items-start px-4 py-3 transition-colors group cursor-pointer divide-x divide-gray-100 dark:divide-gray-800 ${
+                  className={`grid items-stretch transition-colors group cursor-pointer divide-x divide-gray-200 dark:divide-gray-700 ${
                     isSelected
                       ? 'bg-blue-50 dark:bg-blue-900/20'
                       : 'hover:bg-blue-50/40 dark:hover:bg-gray-800/60'
@@ -277,13 +279,15 @@ export function MyIssuesPage() {
                   onClick={() => navigate(`/issues/${issue.id}`)}
                 >
                   {/* Checkbox */}
-                  <input type="checkbox" checked={isSelected}
-                    onChange={() => toggleOne(issue.id)}
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-4 h-4 rounded text-blue-600 cursor-pointer mt-0.5" />
+                  <div className="flex items-center px-4">
+                    <input type="checkbox" checked={isSelected}
+                      onChange={() => toggleOne(issue.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-4 h-4 rounded text-blue-600 cursor-pointer" />
+                  </div>
 
                   {/* ── Title cell — rich info ── */}
-                  <div className="min-w-0 pl-3">
+                  <div className="min-w-0 pl-3 py-3">
                     {/* Key + project */}
                     <div className="flex items-center gap-2 mb-0.5">
                       {cardFields.issueKey && issue.issueKey && (
@@ -344,7 +348,7 @@ export function MyIssuesPage() {
 
                   {/* Workflow step */}
                   {cardFields.workflowStep && (
-                    <div className="flex justify-center pt-0.5 px-2">
+                    <div className="flex items-center justify-center px-3 py-3">
                       {issue.currentStepName ? (
                         <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold border"
                           style={{ background: (issue.currentStepColor ?? '#6b7280') + '20', color: issue.currentStepColor ?? '#6b7280', borderColor: (issue.currentStepColor ?? '#6b7280') + '50' }}>
@@ -356,7 +360,7 @@ export function MyIssuesPage() {
 
                   {/* Environment */}
                   {cardFields.environment && (
-                    <div className="flex justify-center pt-0.5 px-2">
+                    <div className="flex items-center justify-center px-3 py-3">
                       {issue.environment ? (
                         <span className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${envColor[issue.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
                           {issue.environment}
@@ -366,27 +370,27 @@ export function MyIssuesPage() {
                   )}
 
                   {/* Status — always */}
-                  <div className="flex justify-center pt-0.5 px-2">
+                  <div className="flex items-center justify-center px-3 py-3">
                     <StatusBadge status={issue.status} />
                   </div>
 
                   {/* Priority */}
                   {cardFields.priority && (
-                    <div className="flex justify-center pt-0.5 px-2">
+                    <div className="flex items-center justify-center px-3 py-3">
                       <PriorityBadge priority={issue.priority} />
                     </div>
                   )}
 
                   {/* Type */}
                   {cardFields.type && (
-                    <div className="flex justify-center pt-0.5 px-2">
+                    <div className="flex items-center justify-center px-3 py-3">
                       <TypeBadge type={issue.type} />
                     </div>
                   )}
 
                   {/* Due date */}
                   {cardFields.dueDate && (
-                    <div className="flex justify-center pt-0.5 px-2">
+                    <div className="flex items-center justify-center px-3 py-3">
                       {issue.dueDate ? (
                         <span className={`flex items-center gap-0.5 text-xs font-medium ${overdue ? 'text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'}`}>
                           <CalendarDays className="w-3 h-3" />{dueFmt(issue.dueDate)}
@@ -397,7 +401,7 @@ export function MyIssuesPage() {
 
                   {/* Estimate */}
                   {cardFields.estimate && (
-                    <div className="flex justify-center pt-0.5 px-2">
+                    <div className="flex items-center justify-center px-3 py-3">
                       {issue.originalEstimateHours != null ? (
                         <span className="flex items-center gap-0.5 text-xs text-gray-400 dark:text-gray-500">
                           <Clock className="w-3 h-3" />{issue.originalEstimateHours}h
@@ -408,7 +412,7 @@ export function MyIssuesPage() {
 
                   {/* Assignee */}
                   {cardFields.assignee && (
-                    <div className="flex justify-center pt-0.5 px-2">
+                    <div className="flex items-center justify-center px-3 py-3">
                       {issue.assignee
                         ? <Avatar user={issue.assignee} size="xs" />
                         : <div className="w-5 h-5 rounded-full border-2 border-dashed border-gray-200 dark:border-gray-600" />}
@@ -416,7 +420,7 @@ export function MyIssuesPage() {
                   )}
 
                   {/* Updated — always */}
-                  <div className="flex items-center justify-end gap-1 text-xs text-gray-400 dark:text-gray-500 pt-0.5 pl-2">
+                  <div className="flex items-center justify-end gap-1 text-xs text-gray-400 dark:text-gray-500 px-3 py-3">
                     <span>{formatDate(issue.updatedAt)}</span>
                     <ArrowRight className="w-3.5 h-3.5 text-gray-200 dark:text-gray-600 group-hover:text-blue-400 flex-shrink-0" />
                   </div>
