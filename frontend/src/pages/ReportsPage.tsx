@@ -102,7 +102,7 @@ function OverdueReport({ projectId }: { projectId: number }) {
       ) : (
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200">
+            <tr className="border-b border-gray-200 divide-x divide-gray-100">
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('report.key')}</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('report.summary')}</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('report.type')}</th>
@@ -114,7 +114,7 @@ function OverdueReport({ projectId }: { projectId: number }) {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {issues.map((issue) => (
-              <tr key={issue.id} className="hover:bg-red-50 transition-colors">
+              <tr key={issue.id} className="hover:bg-red-50 transition-colors divide-x divide-gray-100">
                 <td className="px-4 py-2.5 font-mono text-xs text-gray-500">{issue.issueKey}</td>
                 <td className="px-4 py-2.5 max-w-xs">
                   <span className="truncate block text-gray-900">{issue.title}</span>

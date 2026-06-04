@@ -133,7 +133,7 @@ export function ProjectVersionsPage() {
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 divide-x divide-gray-100 dark:divide-gray-700">
                   <th className="px-4 py-2.5 text-left text-[11px] font-medium text-gray-400 uppercase tracking-wider">{t('version.name')}</th>
                   <th className="px-4 py-2.5 text-left text-[11px] font-medium text-gray-400 uppercase tracking-wider">{t('version.status')}</th>
                   <th className="px-4 py-2.5 text-left text-[11px] font-medium text-gray-400 uppercase tracking-wider">{t('version.startDate')}</th>
@@ -148,7 +148,7 @@ export function ProjectVersionsPage() {
                   const Icon = meta.icon;
                   const isReleased = v.releaseDate && new Date(v.releaseDate) < new Date();
                   return (
-                    <tr key={v.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+                    <tr key={v.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group divide-x divide-gray-100 dark:divide-gray-800">
                       <td className="px-4 py-2.5 font-medium text-gray-900 dark:text-white">{v.name}</td>
                       <td className="px-4 py-2.5">
                         <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full ${meta.pill}`}>

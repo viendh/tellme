@@ -197,23 +197,23 @@ export function AdvancedSearchPage() {
             ) : (
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                 {/* Header */}
-                <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-3 px-4 py-2.5 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  <span>{t('issue.titleLabel')}</span>
-                  <span className="w-20 text-center">{t('issue.status')}</span>
-                  <span className="w-16 text-center">{t('issue.priority')}</span>
-                  <span className="w-16 text-center">{t('issue.type')}</span>
-                  <span className="w-28">{t('search.project')}</span>
-                  <span className="w-24 text-right">{t('issue.updated')}</span>
+                <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] px-4 py-2.5 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide divide-x divide-gray-200">
+                  <span className="pr-3">{t('issue.titleLabel')}</span>
+                  <span className="w-20 text-center px-3">{t('issue.status')}</span>
+                  <span className="w-16 text-center px-3">{t('issue.priority')}</span>
+                  <span className="w-16 text-center px-3">{t('issue.type')}</span>
+                  <span className="w-28 px-3">{t('search.project')}</span>
+                  <span className="w-24 text-right pl-3">{t('issue.updated')}</span>
                 </div>
                 <div className="divide-y divide-gray-100">
                   {results.map((issue) => (
                     <button
                       key={issue.id}
                       onClick={() => navigate(`/issues/${issue.id}`)}
-                      className="w-full grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-3 items-center px-4 py-3 hover:bg-blue-50/40 text-left group transition-colors"
+                      className="w-full grid grid-cols-[1fr_auto_auto_auto_auto_auto] items-center px-4 py-3 hover:bg-blue-50/40 text-left group transition-colors divide-x divide-gray-100"
                     >
                       {/* Title */}
-                      <div className="min-w-0">
+                      <div className="min-w-0 pr-3">
                         <div className="flex items-center gap-2 mb-0.5">
                           <span className="text-xs font-mono text-gray-400 shrink-0">{issue.issueKey ?? `#${issue.id}`}</span>
                           {issue.labels && (
@@ -226,11 +226,11 @@ export function AdvancedSearchPage() {
                         </div>
                         <p className="text-sm font-medium text-gray-800 truncate group-hover:text-blue-600">{issue.title}</p>
                       </div>
-                      <div className="w-20 flex justify-center"><StatusBadge status={issue.status} /></div>
-                      <div className="w-16 flex justify-center"><PriorityBadge priority={issue.priority} /></div>
-                      <div className="w-16 flex justify-center"><TypeBadge type={issue.type} /></div>
-                      <div className="w-28 text-xs text-gray-500 truncate">{issue.projectName}</div>
-                      <div className="w-24 text-right text-xs text-gray-400">{formatDate(issue.updatedAt)}</div>
+                      <div className="w-20 flex justify-center px-3"><StatusBadge status={issue.status} /></div>
+                      <div className="w-16 flex justify-center px-3"><PriorityBadge priority={issue.priority} /></div>
+                      <div className="w-16 flex justify-center px-3"><TypeBadge type={issue.type} /></div>
+                      <div className="w-28 text-xs text-gray-500 truncate px-3">{issue.projectName}</div>
+                      <div className="w-24 text-right text-xs text-gray-400 pl-3">{formatDate(issue.updatedAt)}</div>
                     </button>
                   ))}
                 </div>

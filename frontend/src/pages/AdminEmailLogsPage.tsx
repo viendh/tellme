@@ -318,7 +318,7 @@ export function AdminEmailLogsPage() {
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
+              <tr className="divide-x divide-gray-200">
                 <th className="text-left px-4 py-3 font-medium text-gray-600 w-40">{t('emailLogs.colTime')}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t('emailLogs.colRecipient')}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t('emailLogs.colSubject')}</th>
@@ -332,7 +332,7 @@ export function AdminEmailLogsPage() {
               {logs.map((log) => (
                 <tr
                   key={log.id}
-                  className={`transition-colors ${log.status === 'FAILED' ? 'bg-red-50/30 hover:bg-red-50/60' : 'hover:bg-gray-50'}`}
+                  className={`transition-colors divide-x divide-gray-100 ${log.status === 'FAILED' ? 'bg-red-50/30 hover:bg-red-50/60' : 'hover:bg-gray-50'}`}
                 >
                   <td className="px-4 py-3 text-gray-500 whitespace-nowrap text-xs">
                     {formatDateTime(log.sentAt)}

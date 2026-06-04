@@ -244,20 +244,20 @@ export function MyIssuesPage() {
           {/* ── Table header ── */}
           <div
             style={gridStyle}
-            className="grid gap-3 px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 text-[11px] font-semibold text-gray-400 uppercase tracking-wide items-center"
+            className="grid px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 text-[11px] font-semibold text-gray-400 uppercase tracking-wide items-center divide-x divide-gray-200 dark:divide-gray-700"
           >
             <input type="checkbox" checked={allVisibleSelected} onChange={toggleAll}
               className="w-4 h-4 rounded text-blue-600 cursor-pointer" />
-            <span>{t('issue.titleLabel')}</span>
-            {cardFields.workflowStep && <span className="text-center">Workflow</span>}
-            {cardFields.environment && <span className="text-center">Env</span>}
-            <span className="text-center">{t('issue.status')}</span>
-            {cardFields.priority  && <span className="text-center">{t('issue.priority')}</span>}
-            {cardFields.type      && <span className="text-center">{t('issue.type')}</span>}
-            {cardFields.dueDate   && <span className="text-center">{t('issue.dueDate')}</span>}
-            {cardFields.estimate  && <span className="text-center">{t('issue.estimate')}</span>}
-            {cardFields.assignee  && <span className="text-center">{t('issue.assignee')}</span>}
-            <span className="text-right">{t('issue.updated')}</span>
+            <span className="pl-3">{t('issue.titleLabel')}</span>
+            {cardFields.workflowStep && <span className="text-center px-2">Workflow</span>}
+            {cardFields.environment && <span className="text-center px-2">Env</span>}
+            <span className="text-center px-2">{t('issue.status')}</span>
+            {cardFields.priority  && <span className="text-center px-2">{t('issue.priority')}</span>}
+            {cardFields.type      && <span className="text-center px-2">{t('issue.type')}</span>}
+            {cardFields.dueDate   && <span className="text-center px-2">{t('issue.dueDate')}</span>}
+            {cardFields.estimate  && <span className="text-center px-2">{t('issue.estimate')}</span>}
+            {cardFields.assignee  && <span className="text-center px-2">{t('issue.assignee')}</span>}
+            <span className="text-right px-2">{t('issue.updated')}</span>
           </div>
 
           {/* ── Rows ── */}
@@ -269,7 +269,7 @@ export function MyIssuesPage() {
                 <div
                   key={issue.id}
                   style={gridStyle}
-                  className={`grid gap-3 items-start px-4 py-3 transition-colors group cursor-pointer ${
+                  className={`grid items-start px-4 py-3 transition-colors group cursor-pointer divide-x divide-gray-100 dark:divide-gray-800 ${
                     isSelected
                       ? 'bg-blue-50 dark:bg-blue-900/20'
                       : 'hover:bg-blue-50/40 dark:hover:bg-gray-800/60'
@@ -283,7 +283,7 @@ export function MyIssuesPage() {
                     className="w-4 h-4 rounded text-blue-600 cursor-pointer mt-0.5" />
 
                   {/* ── Title cell — rich info ── */}
-                  <div className="min-w-0">
+                  <div className="min-w-0 pl-3">
                     {/* Key + project */}
                     <div className="flex items-center gap-2 mb-0.5">
                       {cardFields.issueKey && issue.issueKey && (
@@ -344,7 +344,7 @@ export function MyIssuesPage() {
 
                   {/* Workflow step */}
                   {cardFields.workflowStep && (
-                    <div className="flex justify-center pt-0.5">
+                    <div className="flex justify-center pt-0.5 px-2">
                       {issue.currentStepName ? (
                         <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold border"
                           style={{ background: (issue.currentStepColor ?? '#6b7280') + '20', color: issue.currentStepColor ?? '#6b7280', borderColor: (issue.currentStepColor ?? '#6b7280') + '50' }}>
@@ -356,7 +356,7 @@ export function MyIssuesPage() {
 
                   {/* Environment */}
                   {cardFields.environment && (
-                    <div className="flex justify-center pt-0.5">
+                    <div className="flex justify-center pt-0.5 px-2">
                       {issue.environment ? (
                         <span className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${envColor[issue.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
                           {issue.environment}
@@ -366,27 +366,27 @@ export function MyIssuesPage() {
                   )}
 
                   {/* Status — always */}
-                  <div className="flex justify-center pt-0.5">
+                  <div className="flex justify-center pt-0.5 px-2">
                     <StatusBadge status={issue.status} />
                   </div>
 
                   {/* Priority */}
                   {cardFields.priority && (
-                    <div className="flex justify-center pt-0.5">
+                    <div className="flex justify-center pt-0.5 px-2">
                       <PriorityBadge priority={issue.priority} />
                     </div>
                   )}
 
                   {/* Type */}
                   {cardFields.type && (
-                    <div className="flex justify-center pt-0.5">
+                    <div className="flex justify-center pt-0.5 px-2">
                       <TypeBadge type={issue.type} />
                     </div>
                   )}
 
                   {/* Due date */}
                   {cardFields.dueDate && (
-                    <div className="flex justify-center pt-0.5">
+                    <div className="flex justify-center pt-0.5 px-2">
                       {issue.dueDate ? (
                         <span className={`flex items-center gap-0.5 text-xs font-medium ${overdue ? 'text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'}`}>
                           <CalendarDays className="w-3 h-3" />{dueFmt(issue.dueDate)}
@@ -397,7 +397,7 @@ export function MyIssuesPage() {
 
                   {/* Estimate */}
                   {cardFields.estimate && (
-                    <div className="flex justify-center pt-0.5">
+                    <div className="flex justify-center pt-0.5 px-2">
                       {issue.originalEstimateHours != null ? (
                         <span className="flex items-center gap-0.5 text-xs text-gray-400 dark:text-gray-500">
                           <Clock className="w-3 h-3" />{issue.originalEstimateHours}h
@@ -408,7 +408,7 @@ export function MyIssuesPage() {
 
                   {/* Assignee */}
                   {cardFields.assignee && (
-                    <div className="flex justify-center pt-0.5">
+                    <div className="flex justify-center pt-0.5 px-2">
                       {issue.assignee
                         ? <Avatar user={issue.assignee} size="xs" />
                         : <div className="w-5 h-5 rounded-full border-2 border-dashed border-gray-200 dark:border-gray-600" />}
@@ -416,7 +416,7 @@ export function MyIssuesPage() {
                   )}
 
                   {/* Updated — always */}
-                  <div className="flex items-center justify-end gap-1 text-xs text-gray-400 dark:text-gray-500 pt-0.5">
+                  <div className="flex items-center justify-end gap-1 text-xs text-gray-400 dark:text-gray-500 pt-0.5 pl-2">
                     <span>{formatDate(issue.updatedAt)}</span>
                     <ArrowRight className="w-3.5 h-3.5 text-gray-200 dark:text-gray-600 group-hover:text-blue-400 flex-shrink-0" />
                   </div>

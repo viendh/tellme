@@ -131,7 +131,7 @@ export function ProjectMembersPage() {
         ) : (
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
+              <tr className="divide-x divide-gray-200">
                 <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">
                   {t('members.colUser')}
                 </th>
@@ -150,7 +150,7 @@ export function ProjectMembersPage() {
                 const isSelf = member.user.id === currentUser?.id;
                 const isOwner = member.role === 'OWNER';
                 return (
-                  <tr key={member.id} className="hover:bg-gray-50">
+                  <tr key={member.id} className="hover:bg-gray-50 divide-x divide-gray-100">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <Avatar user={member.user} size="sm" />
